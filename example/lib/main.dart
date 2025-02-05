@@ -1,125 +1,135 @@
-import 'package:flutter/material.dart';
+import 'package:fake_store_package/fake_store_package.dart';
+import 'package:fake_store_package/helpers/log_printer/log_printer.dart';
+import 'package:fake_store_package/models/cart/cart_request.dart';
+import 'package:fake_store_package/models/user/user.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() async {
+  // Instancia del servicio de logs para imprimir mensajes en consola de manera ordenada
+  final LoggerService loggerService = LoggerService();
+  // Instancia del paquete de FakeStore para interactuar con la API de FakeStore
+  final fakeStore = FakeStorePackage();
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  // Obtener todos los productos
+  loggerService.logInfo('Obteniendo todos los productos...');
+  try {
+    final products = await fakeStore.getAllProducts();
+    products.fold(
+        (error) => loggerService.logError('Error al obtener los productos: $error'),
 
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+        (products) {
+          loggerService.logInfo('Productos obtenidos:');
+          for (var product in products) {
+            loggerService.logInfo(
+                'Producto: ${product.title}, \$${product.price}');
+          }
+        } );
+  } catch (e) {
+    loggerService.logError('Error al obtener los productos: $e');
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
-  }
+
+  // Obtener detalles de un producto por ID
+  loggerService.logInfo('\nObteniendo detalles del producto con ID 1...');
+  final productResult = await fakeStore.getProduct(1);
+  productResult.fold(
+        (error) => loggerService.logError('Error al obtener el producto: $error'),
+        (product) => loggerService.logInfo('Producto obtenido: ${product.title}, \$${product.price}'),
+  );
+
+  // Obtener categorías de productos
+  loggerService.logInfo('\nObteniendo categorías...');
+  final categoriesResult = await fakeStore.getCategories();
+  categoriesResult.fold(
+        (error) => loggerService.logError('Error al obtener las categorías: $error'),
+        (categories) => loggerService.logInfo('Categorías: ${categories.categories.join(', ')}'),
+  );
+
+  // Crear un usuario
+  loggerService.logInfo('\nCreando un usuario...');
+  final newUser = User(
+    name: Name(firstname: "carlos", lastname: "perez"),
+    email: 'carlos@example.com',
+    username: 'carlos123',
+    password: 'password123',
+    address: Address(city: "Bogotá", street: "100", number: 7,
+        zipcode: "001", geolocation: Geolocation(lat: "454564", long: "54545")),
+    phone: '1234567890',
+  );
+  final userCreationResult = await fakeStore.createUser(newUser);
+  userCreationResult.fold(
+        (error) => loggerService.logError('Error al crear el usuario: $error'),
+        (response) => loggerService.logInfo('Usuario creado exitosamente: ${response['id']}'),
+  );
+
+  // Crear un carrito de compras
+  loggerService.logInfo('\nCreando un carrito de compras...');
+  final newCart = CartRequest(
+    userId: 1,
+    date: DateTime.now(),
+    products: const [CartProducts(productId: 1, quantity: 2)]
+  );
+  final cartCreationResult = await fakeStore.createCart(newCart);
+  cartCreationResult.fold(
+        (error) => loggerService.logError('Error al crear el carrito: $error'),
+        (response) => loggerService.logInfo('Carrito creado exitosamente: ${response['id']}'),
+  );
+
+  // Obtener un carrito por ID
+  loggerService.logInfo('\nObteniendo el carrito con ID 1...');
+  final cartResult = await fakeStore.getCart(1);
+  cartResult.fold(
+        (error) => loggerService.logError('Error al obtener el carrito: $error'),
+        (cart) {
+          loggerService.logInfo('Carrito obtenido: ID ${cart.id}');
+      for (var item in cart.products) {
+        loggerService.logInfo('Producto ${item.productId}, Cantidad: ${item.quantity}');
+      }
+    },
+  );
+
+  // Ejemplo de login
+  final loginBody = {'username': 'john_doe', 'password': 'password123'};
+  final loginResult = await fakeStore.login(loginBody);
+  loginResult.fold(
+        (apiError) => loggerService.logError('API Error during login: $apiError'),
+        (success) => loggerService.logInfo('Login successful! Token: ${success['token']}'),
+  );
+
+  // Obtener productos por categoría
+  const category = 'electronics';
+  final productsResult = await fakeStore.getProductByCategory(category);
+  productsResult.fold(
+        (apiError) => loggerService.logError('API Error fetching products: $apiError'),
+        (products) {
+          loggerService.logInfo('Products in category "$category":');
+      for (var product in products) {
+        loggerService.logInfo(' - ${product.title} (\$${product.price})');
+      }
+    },
+  );
+
+  // Obtener un usuario por ID y mostrar sus detalles
+  const userId = 1;
+  final userResult = await fakeStore.getUser(userId);
+  userResult.fold(
+        (apiError) => loggerService.logError('API Error fetching user: $apiError'),
+        (user) => loggerService.logInfo('User details: ${user.name}, Email: ${user.email}'),
+  );
+
+  // Actualizar carrito de compras
+  const cartId = 1;
+  final cartRequest = CartRequest(
+    userId: 1,
+    date: DateTime.now(),
+    products: const [
+      CartProducts(productId: 1, quantity: 2),
+      CartProducts(productId: 2, quantity: 1),
+    ],
+  );
+  final updateCartResult = await fakeStore.updateCart(cartId, cartRequest);
+  updateCartResult.fold(
+        (apiError) => loggerService.logError('API Error updating cart: $apiError'),
+        (success) => loggerService.logInfo('Cart updated successfully: $success'),
+  );
+
 }
