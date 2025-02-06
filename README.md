@@ -1,39 +1,42 @@
 <!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
-
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages).
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages).
+este archivo es el readme del package api fake store publicado  en git hub
 -->
+# fake_store_api
+ este package es una aplicación dart destinada al consumo de la api fake store  y a la demostración de manejo de errores
+## Descripción
+este packege te permite interactuar con la fake store api y obtener mediante las funciones elaboradas en el package
+información relacionada a los productos de la api,un producto en especifico , productos por categoria, las categorias existentes y el carrito de compras(añadirlo y editarlo),
+asi como la creación de usuario y el login.
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+## ejemplo de uso
+aqui puedes observar un ejemplo de como usar el package para obtener un producto en especifico en conjunto con la impresion de sus valores en consola
 
-## Features
+// instancia de FakeStorePackage
+final fakeStore = FakeStorePackage();
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+loggerService.logInfo('\nObteniendo detalles del producto con ID 1...');
+// Obtener un producto por ID
+final productResult = await fakeStore.getProduct(1);
+productResult.fold(
+(error) => loggerService.logError('Error al obtener el producto: $error'),
+(product) => loggerService.logInfo('Producto obtenido: ${product.title}, \$${product.price}'),
+);
 
-## Getting started
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
 
 ## Usage
+para usar este package solo debes importarlo en tu archivo pubspec.yaml y usar las funciones que se encuentran en el package
+en este caso desde git hub puedes importarlo de la siguiente manera
+ git :
+    url: 'https://github.com/YordiColina/fake_store_package.git'  //aqui va la url de el package en git hub
+    ref: 'master' //aqui va la rama de el package en este caso master
+    path: '/..' //aqui va la carpeta donde se encuentra el package solo si cuentas con mas de uno
 
-TODO: Include short and useful examples for package users. Add longer examples
+en el example puedes observar un ejemplo de como usar el package para obtener una lista de productos , una lista de categorias y un carrito de compras
+
+
 to `/example` folder.
 
-```dart
+
 const like = 'sample';
 ```
-
-## Additional information
-
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.

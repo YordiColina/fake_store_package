@@ -1,7 +1,7 @@
 name: fake_store_package
-description: "A new Flutter project."
+description: "paquete destinado a facilitar la implementación de la api de fake store"
 version: 0.0.1
-homepage:
+homepage: https://github.com/YordiColina/fake_store_package
 
 environment:
   sdk: ^3.5.3

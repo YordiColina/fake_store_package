@@ -79,19 +79,26 @@ class FakeStorePackage {
     });
   }
 
-  Future<Either<String, Cart>> getCart(int cartId) async {
+  Future<Either<String, List<Cart>>> getCart(int id) async {
     return await ApiErrorHandler.execute(() async {
-      final response = await _cartService.getCart(cartId);
+      final response = await _cartService.getCart(id);
+
       if (response.isSuccessful) {
-        final data = response.body as Map<String, dynamic>;
-        final Cart cart = Cart.fromJson(data);
-        for (var carts in cart.products) {
-          _loggerService.logInfo(
+        final data = response.body;
+        if (data is List) {
+          final List<Cart> carts = data
+              .map((cartData) => Cart.fromJson(cartData as Map<String, dynamic>))
+              .toList();
+          for (var cart in carts) {
+            _loggerService.logInfo(
               'Carrito obtenido correctamente\n ${response.statusCode}\ncarrito nro ${cart.id}\n'
-                  'id de producto ${carts.productId}\n'
-                  'cantidad de ese producto ${carts.quantity}');
+                  'productos en carrito: ${cart.products.length}',
+            );
+          }
+          return carts;
+        } else {
+          throw Exception('Respuesta inesperada: Se esperaba una lista, pero se recibió otro tipo de dato.');
         }
-        return cart;
       } else {
         throw HttpException(
             'API Error: ${response.statusCode} - ${response.error ?? "Unknown error"}');
