@@ -57,7 +57,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Package Example')),
       body: Padding(
-        padding: const EdgeInsets.only(left: 20, right: 20),  
+        padding: const EdgeInsets.only(left: 20, right: 20,top: 20),
         child: Column(
           children: [
             // campos donde reflejamos la información del producto
