@@ -53,6 +53,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
     obtenerCategorias(); //invocación de función para obtener categorías
     obtenerCarrito();   //invocación de función para obtener carrito
   }
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Package Example')),
@@ -60,7 +61,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
         padding: const EdgeInsets.only(left: 20, right: 20,top: 20),
         child: Column(
           children: [
-            Text("Informacion del producto"),
+            const Text("Informacion del producto"),
             // campos donde reflejamos la información del producto
           TextField(
             controller: _controllerTitle,
@@ -120,7 +121,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
           }).toList(),
         ),
             const SizedBox(height: 20),
-            Text("Informacion del carrito de compras"),
+            const Text("Informacion del carrito de compras"),
             Container(
               height: 250,
               width: double.infinity,
