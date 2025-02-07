@@ -60,6 +60,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
         padding: const EdgeInsets.only(left: 20, right: 20,top: 20),
         child: Column(
           children: [
+            Text("Informacion del producto"),
             // campos donde reflejamos la información del producto
           TextField(
             controller: _controllerTitle,
@@ -102,8 +103,9 @@ class _ExampleScreenState extends State<ExampleScreen> {
             ),
             const SizedBox(height: 20),
          // Dropdown para seleccionar una opción entre las categorias
+
           DropdownButton<String>(
-          hint: const Text('Selecciona una opción'),
+          hint: const Text('Selecciona una categoria'),
           value: _selectedOption,
           onChanged: (String? newValue) {
             setState(() {
@@ -118,7 +120,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
           }).toList(),
         ),
             const SizedBox(height: 20),
-
+            Text("Informacion del carrito de compras"),
             Container(
               height: 250,
               width: double.infinity,
