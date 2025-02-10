@@ -127,6 +127,53 @@ result.fold(
 - **Personalización:** Permite adaptar las solicitudes HTTP a las necesidades específicas.
 - **Compatibilidad:** Funciona perfectamente con otras bibliotecas de Flutter como Provider o Bloc.
 
+### ¿Cómo funciona Chopper?
+1. Definición de servicios
+* Chopper funciona a través de servicios que definen las solicitudes HTTP como métodos de Dart. Cada servicio usa anotaciones para describir los endpoints y métodos HTTP.
+- Ejemplo de definición de un servicio:
+```dart
+@ChopperApi()
+abstract class ProductService extends ChopperService {
+  @Get(path: '/products')
+  Future<Response<List<Product>>> getAllProducts();
+  
+  static ProductService create([ChopperClient? client]) =>
+      _ProductService(client);
+}
+```
+
+2. # Uso de interceptores
+*Chopper permite interceptar solicitudes y respuestas, lo que facilita agregar autenticación o manejar errores.
+- Ejemplo de un interceptor de autenticación:
+```dart
+class AuthInterceptor implements RequestInterceptor {
+  @override
+  FutureOr<Request> onRequest(Request request) {
+    final updatedHeaders = Map<String, String>.from(request.headers)
+      ..['Authorization'] = 'Bearer YOUR_TOKEN';
+    return request.copyWith(headers: updatedHeaders);
+  }
+}
+```
+
+3. # Serialización automática
+* Chopper puede serializar y deserializar JSON automáticamente con json_serializable.
+- Ejemplo:
+```dart
+@JsonSerializable()
+class Product {
+  final int id;
+  final String title;
+  final double price;
+  
+  Product({required this.id, required this.title, required this.price});
+  
+  factory Product.fromJson(Map<String, dynamic> json) => _$ProductFromJson(json);
+  Map<String, dynamic> toJson() => _$ProductToJson(this);
+}
+```
+
+
 ### Comparación con `http`
 
 | Característica         | Chopper | http |
