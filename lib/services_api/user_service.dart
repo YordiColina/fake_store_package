@@ -6,7 +6,7 @@ part 'user_service.chopper.dart';
 
 @ChopperApi()
 abstract class UserService extends ChopperService {
-  @Get(path: '/user/{id}')
+  @Get(path: '/users/{id}')
   Future<Response> getUser(@Path('id') int id);
 
 

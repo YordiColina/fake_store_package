@@ -11,7 +11,7 @@ abstract class ProductService extends ChopperService {
   @Get(path: '/products/{id}')
   Future<Response> getProduct(@Path('id') int id);
 
-  @Get(path: '/products/{category}')
+  @Get(path: '/products/category/{category}')
   Future<Response> getProductByCategory(@Path('category') String category);
 
   @Get(path: '/products/categories')

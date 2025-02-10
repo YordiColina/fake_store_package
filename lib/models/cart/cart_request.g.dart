@@ -20,14 +20,3 @@ Map<String, dynamic> _$CartRequestToJson(CartRequest instance) =>
       'date': instance.date.toIso8601String(),
       'products': instance.products,
     };
-
-CartProducts _$CartProductsFromJson(Map<String, dynamic> json) => CartProducts(
-      productId: (json['productId'] as num).toInt(),
-      quantity: (json['quantity'] as num).toInt(),
-    );
-
-Map<String, dynamic> _$CartProductsToJson(CartProducts instance) =>
-    <String, dynamic>{
-      'productId': instance.productId,
-      'quantity': instance.quantity,
-    };

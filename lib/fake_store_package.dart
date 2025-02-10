@@ -12,12 +12,36 @@ import 'models/categories/categories.dart';
 import 'models/products/product.dart';
 import 'models/user/user.dart';
 
+/// Clase principal para interactuar con la API de Fake Store.
+///
+/// Esta clase proporciona métodos para:
+/// - Obtener productos, categorías, carritos y usuarios.
+/// - Crear usuarios, iniciar sesión y gestionar carritos.
+///
+/// Utiliza los siguientes servicios:
+/// - `ProductService`: Para interactuar con los endpoints relacionados con productos.
+/// - `CartService`: Para interactuar con los endpoints relacionados con carritos.
+/// - `UserService`: Para interactuar con los endpoints relacionados con usuarios.
+/// - `LoggerService`: Para registrar información y errores durante las operaciones.
 class FakeStorePackage {
   final LoggerService _loggerService = LoggerService();
   final ProductService _productService = ProductService.create();
   final CartService _cartService = CartService.create();
   final UserService _userService = UserService.create();
 
+  /// Obtiene todos los productos disponibles en la API.
+  ///
+  /// **Entradas**: Ninguna.
+  ///
+  /// **Proceso**:
+  /// 1. Realiza una solicitud a la API para obtener todos los productos.
+  /// 2. Si la respuesta es exitosa, convierte los datos JSON en una lista de objetos `Product`.
+  /// 3. Registra los detalles de cada producto utilizando `_loggerService`.
+  /// 4. Devuelve la lista de productos.
+  ///
+  /// **Retorna**:
+  /// - `Either<String, List<Product>>`: Una lista de productos si la solicitud es exitosa,
+  ///   o un mensaje de error si falla.
   Future<Either<String, List<Product>>> getAllProducts() async {
     return await ApiErrorHandler.execute(() async {
       final response = await _productService.getAllProducts();
@@ -39,6 +63,19 @@ class FakeStorePackage {
     });
   }
 
+  /// Obtiene un producto específico por su ID.
+  ///
+  /// **Entradas**:
+  /// - `id`: El ID del producto a obtener.
+  ///
+  /// **Proceso**:
+  /// 1. Realiza una solicitud a la API para obtener un producto específico por su ID.
+  /// 2. Si la respuesta es exitosa, convierte los datos JSON en un objeto `Product`.
+  /// 3. Devuelve el producto.
+  ///
+  /// **Retorna**:
+  /// - `Either<String, Product>`: El producto si la solicitud es exitosa,
+  ///   o un mensaje de error si falla.
   Future<Either<String, Product>> getProduct(int id) async {
     return await ApiErrorHandler.execute(() async {
       final response = await _productService.getProduct(id);
@@ -51,6 +88,19 @@ class FakeStorePackage {
     });
   }
 
+  /// Obtiene todas las categorías de productos disponibles en la API.
+  ///
+  /// **Entradas**: Ninguna.
+  ///
+  /// **Proceso**:
+  /// 1. Realiza una solicitud a la API para obtener todas las categorías.
+  /// 2. Si la respuesta es exitosa, convierte los datos JSON en un objeto `Categories`.
+  /// 3. Registra la información de las categorías utilizando `_loggerService`.
+  /// 4. Devuelve el objeto `Categories`.
+  ///
+  /// **Retorna**:
+  /// - `Either<String, Categories>`: Un objeto `Categories` si la solicitud es exitosa,
+  ///   o un mensaje de error si falla.
   Future<Either<String, Categories>> getCategories() async {
     return await ApiErrorHandler.execute(() async {
       final response = await _productService.getCategories();
@@ -67,18 +117,54 @@ class FakeStorePackage {
     });
   }
 
-  Future<Either<String, List<Product>>> getProductByCategory(String category) async {
+  /// Obtiene todos los productos de una categoría específica.
+  ///
+  /// **Entradas**:
+  /// - `category`: La categoría de los productos a obtener.
+  ///
+  /// **Proceso**:
+  /// 1. Realiza una solicitud a la API para obtener todos los productos de una categoría específica.
+  /// 2. Si la respuesta es exitosa, convierte los datos JSON en una lista de objetos `Product`.
+  /// 3. Devuelve la lista de productos.
+  ///
+  /// **Retorna**:
+  /// - `Either<String, List<Product>>`: Una lista de productos si la solicitud es exitosa,
+  ///   o un mensaje de error si falla.
+  Future<Either<String, List<Product>>> getProductsByCategory(String category) async {
     return await ApiErrorHandler.execute(() async {
       final response = await _productService.getProductByCategory(category);
+
+      print('Respuesta de la API: ${response.body}'); // Debugging
+
       if (response.isSuccessful) {
-        return (response.body as List).map((e) => Product.fromJson(e)).toList();
+        if (response.body is List) {
+          return (response.body as List).map((e) => Product.fromJson(e)).toList();
+        } else {
+          throw HttpException('La API no devolvió una lista de productos.');
+        }
       } else {
         throw HttpException(
-            'API Error: ${response.statusCode} - ${response.error ?? "Unknown error"}');
+            'API Error: ${response.statusCode} - ${response.error ?? "Unknown error"}'
+        );
       }
     });
   }
 
+
+  /// Obtiene el carrito de compras de un usuario específico por su ID.
+  ///
+  /// **Entradas**:
+  /// - `id`: El ID del usuario cuyo carrito se desea obtener.
+  ///
+  /// **Proceso**:
+  /// 1. Realiza una solicitud a la API para obtener el carrito de un usuario específico.
+  /// 2. Si la respuesta es exitosa, convierte los datos JSON en una lista de objetos `Cart`.
+  /// 3. Registra la información del carrito utilizando `_loggerService`.
+  /// 4. Devuelve la lista de carritos.
+  ///
+  /// **Retorna**:
+  /// - `Either<String, List<Cart>>`: Una lista de carritos si la solicitud es exitosa,
+  ///   o un mensaje de error si falla.
   Future<Either<String, List<Cart>>> getCart(int id) async {
     return await ApiErrorHandler.execute(() async {
       final response = await _cartService.getCart(id);
@@ -106,6 +192,19 @@ class FakeStorePackage {
     });
   }
 
+  /// Obtiene la información de un usuario específico por su ID.
+  ///
+  /// **Entradas**:
+  /// - `id`: El ID del usuario a obtener.
+  ///
+  /// **Proceso**:
+  /// 1. Realiza una solicitud a la API para obtener la información de un usuario específico.
+  /// 2. Si la respuesta es exitosa, convierte los datos JSON en un objeto `GetUser`.
+  /// 3. Devuelve el objeto `GetUser`.
+  ///
+  /// **Retorna**:
+  /// - `Either<String, GetUser>`: Un objeto `GetUser` si la solicitud es exitosa,
+  ///   o un mensaje de error si falla.
   Future<Either<String, GetUser>> getUser(int id) async {
     return await ApiErrorHandler.execute(() async {
       final response = await _userService.getUser(id);
@@ -118,6 +217,18 @@ class FakeStorePackage {
     });
   }
 
+  /// Crea un nuevo usuario en la API.
+  ///
+  /// **Entradas**:
+  /// - `body`: Un objeto `User` que contiene la información del usuario a crear.
+  ///
+  /// **Proceso**:
+  /// 1. Realiza una solicitud a la API para crear un nuevo usuario.
+  /// 2. Si la respuesta es exitosa, devuelve la respuesta de la API como un mapa.
+  ///
+  /// **Retorna**:
+  /// - `Either<String, Map<String, dynamic>>`: Un mapa con la respuesta de la API si la solicitud es exitosa,
+  ///   o un mensaje de error si falla.
   Future<Either<String, Map<String, dynamic>>> createUser(User body) async {
     return await ApiErrorHandler.execute(() async {
       final response = await _userService.createUser(body);
@@ -130,6 +241,18 @@ class FakeStorePackage {
     });
   }
 
+  /// Inicia sesión en la API con las credenciales proporcionadas.
+  ///
+  /// **Entradas**:
+  /// - `body`: Un mapa que contiene las credenciales del usuario (usuario y contraseña).
+  ///
+  /// **Proceso**:
+  /// 1. Realiza una solicitud a la API para iniciar sesión.
+  /// 2. Si la respuesta es exitosa, devuelve la respuesta de la API como un mapa.
+  ///
+  /// **Retorna**:
+  /// - `Either<String, Map<String, dynamic>>`: Un mapa con la respuesta de la API si la solicitud es exitosa,
+  ///   o un mensaje de error si falla.
   Future<Either<String, Map<String, dynamic>>> login(Map<String, dynamic> body) async {
     return await ApiErrorHandler.execute(() async {
       final response = await _userService.login(body);
@@ -142,6 +265,18 @@ class FakeStorePackage {
     });
   }
 
+  /// Crea un nuevo carrito de compras en la API.
+  ///
+  /// **Entradas**:
+  /// - `body`: Un objeto `CartRequest` que contiene la información del carrito a crear.
+  ///
+  /// **Proceso**:
+  /// 1. Realiza una solicitud a la API para crear un nuevo carrito.
+  /// 2. Si la respuesta es exitosa, devuelve la respuesta de la API como un mapa.
+  ///
+  /// **Retorna**:
+  /// - `Either<String, Map<String, dynamic>>`: Un mapa con la respuesta de la API si la solicitud es exitosa,
+  ///   o un mensaje de error si falla.
   Future<Either<String, Map<String, dynamic>>> createCart(CartRequest body) async {
     return await ApiErrorHandler.execute(() async {
       final response = await _cartService.createCart(body);
@@ -154,6 +289,19 @@ class FakeStorePackage {
     });
   }
 
+  /// Actualiza un carrito de compras existente en la API.
+  ///
+  /// **Entradas**:
+  /// - `id`: El ID del carrito a actualizar.
+  /// - `body`: Un objeto `CartRequest` que contiene la información actualizada del carrito.
+  ///
+  /// **Proceso**:
+  /// 1. Realiza una solicitud a la API para actualizar un carrito existente.
+  /// 2. Si la respuesta es exitosa, devuelve la respuesta de la API como un mapa.
+  ///
+  /// **Retorna**:
+  /// - `Either<String, Map<String, dynamic>>`: Un mapa con la respuesta de la API si la solicitud es exitosa,
+  ///   o un mensaje de error si falla.
   Future<Either<String, Map<String, dynamic>>> updateCart(int id, CartRequest body) async {
     return await ApiErrorHandler.execute(() async {
       final response = await _cartService.updateCart(id, body);

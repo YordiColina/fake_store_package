@@ -41,7 +41,7 @@ final class _$ProductService extends ProductService {
 
   @override
   Future<Response<dynamic>> getProductByCategory(String category) {
-    final Uri $url = Uri.parse('/products/${category}');
+    final Uri $url = Uri.parse('/products/category/${category}');
     final Request $request = Request(
       'GET',
       $url,

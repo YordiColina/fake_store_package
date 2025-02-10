@@ -19,7 +19,7 @@ final class _$UserService extends UserService {
 
   @override
   Future<Response<dynamic>> getUser(int id) {
-    final Uri $url = Uri.parse('/user/${id}');
+    final Uri $url = Uri.parse('/users/${id}');
     final Request $request = Request(
       'GET',
       $url,

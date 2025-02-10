@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import 'cart.dart';
+
 part 'cart_request.g.dart';
 
 @JsonSerializable()
@@ -25,23 +27,4 @@ class CartRequest {
   factory CartRequest.fromJson(Map<String, dynamic> json) => _$CartRequestFromJson(json);
 
   Map<String, dynamic> toJson() => _$CartRequestToJson(this);
-}
-
-@JsonSerializable()
-@immutable
-class CartProducts {
-  @JsonKey(name: "productId")
-  final int productId;
-
-  @JsonKey(name: "quantity")
-  final int quantity;
-
-  const CartProducts({
-    required this.productId,
-    required this.quantity,
-  });
-
-  factory CartProducts.fromJson(Map<String, dynamic> json) => _$CartProductsFromJson(json);
-
-  Map<String, dynamic> toJson() => _$CartProductsToJson(this);
 }
