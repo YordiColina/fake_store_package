@@ -535,7 +535,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
    * Salida: Ninguna, pero actualiza el estado con la información del inicio de sesión.
    */
   Future<void> iniciarSesion(LoginRequest loginRequest) async {
-    final loginResult = await fakeStore.login(loginRequest.toJson());
+    final loginResult = await fakeStore.login(loginRequest);
     loginResult.fold(
           (error) {
             print(loginResult);

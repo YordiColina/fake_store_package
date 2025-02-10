@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:dartz/dartz.dart';
+import 'package:fake_store_package/models/auth/login_request.dart';
 import 'package:fake_store_package/models/cart/cart_request.dart';
 import 'package:fake_store_package/models/user/get_user.dart';
 import 'package:fake_store_package/services_api/cart_service.dart';
@@ -253,9 +254,9 @@ class FakeStorePackage {
   /// **Retorna**:
   /// - `Either<String, Map<String, dynamic>>`: Un mapa con la respuesta de la API si la solicitud es exitosa,
   ///   o un mensaje de error si falla.
-  Future<Either<String, Map<String, dynamic>>> login(Map<String, dynamic> body) async {
+  Future<Either<String, Map<String, dynamic>>> login(LoginRequest body) async {
     return await ApiErrorHandler.execute(() async {
-      final response = await _userService.login(body);
+      final response = await _userService.login(body.toJson());
       if (response.isSuccessful) {
         return response.body as Map<String, dynamic>;
       } else {
