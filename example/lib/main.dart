@@ -64,6 +64,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
       CartProducts(productId: 2, quantity: 1),
     ],
   );
+
 /// Objeto de usuario que contiene la información del usuario.
   /// Se usa para crear un usuario.
   final user = User(
@@ -80,6 +81,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
     ),
     phone: '123-456-7890',
   );
+
   /// Objeto de solicitud de inicio de sesión que contiene el nombre de usuario y la contraseña.
   final loginRequest = const LoginRequest(
     username: 'mor_2314',
