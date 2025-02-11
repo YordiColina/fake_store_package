@@ -99,7 +99,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
     obtenerProductoPorId(1); // Obtener el producto con ID 1 al iniciar la pantalla.
     crearUsuario(user); // Crear un usuario al iniciar la pantalla.
     crearCarrito(cartRequest); // Crear un carrito al iniciar la pantalla.
-    actualizarCarrito(cartRequest); // Actualizar un carrito al iniciar la pantalla.
+    actualizarCarrito(cartRequest,1); // Actualizar un carrito al iniciar la pantalla.
     obtenerUsuario(1); // Obtener el usuario con ID 1 al iniciar la pantalla.
     iniciarSesion(loginRequest); // Iniciar sesión al iniciar la pantalla.
   }
@@ -286,6 +286,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
    * Entrada: Ninguna.
    * Salida: Ninguna, pero actualiza el estado con la información del carrito.
    */
+
   void obtenerCarrito( int id) async {
     final cart = await fakeStore.getCart(id); // Obtiene el carrito del usuario con ID 2.
     cart.fold(
@@ -469,8 +470,8 @@ class _ExampleScreenState extends State<ExampleScreen> {
    * Entrada: Ninguna.
    * Salida: Ninguna, pero actualiza el estado con la información del carrito actualizado.
    */
-  Future<void> actualizarCarrito(CartRequest cartRequest) async {
-    final cartResult = await fakeStore.updateCart(1, cartRequest); // Actualizamos el carrito con ID 1.
+  Future<void> actualizarCarrito(CartRequest cartRequest,int id) async {
+    final cartResult = await fakeStore.updateCart(id, cartRequest); // Actualizamos el carrito con ID 1.
     cartResult.fold(
           (error) {
         // Registra el error en los logs.
