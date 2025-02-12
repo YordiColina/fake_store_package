@@ -21,6 +21,9 @@ abstract class CartService extends ChopperService {
       @Body() CartRequest body,
       );
 
+  @Delete(path: '/carts/{id}')
+  Future<Response> deleteCart(@Path('id') int id);
+
 
 
   static CartService create() {

@@ -314,4 +314,29 @@ class FakeStorePackage {
       }
     });
   }
+
+  /// Eliminas un carrito de compras existente en la API.
+  ///
+  /// **Entradas**:
+  /// - `id`: El ID del carrito a eliminar.
+  /// - `
+  ///
+  /// **Proceso**:
+  /// 1. Realiza una solicitud a la API para eliminar un carrito existente.
+  /// 2. Si la respuesta es exitosa, devuelve la respuesta de la API como un mapa con la información del carrito eliminado.
+  ///
+  /// **Retorna**:
+  /// - `Either<String, Map<String, dynamic>>`: Un mapa con la respuesta de la API si la solicitud es exitosa,
+  ///   o un mensaje de error si falla.
+  Future<Either<String, Map<String, dynamic>>> deleteCart(int id) async {
+    return await ApiErrorHandler.execute(() async {
+      final response = await _cartService.deleteCart(id);
+      if (response.isSuccessful) {
+        return response.body as Map<String, dynamic>;
+      } else {
+        throw HttpException(
+            'API Error: ${response.statusCode} - ${response.error ?? "Unknown error"}');
+      }
+    });
+  }
 }

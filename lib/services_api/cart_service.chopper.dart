@@ -56,4 +56,15 @@ final class _$CartService extends CartService {
     );
     return client.send<dynamic, dynamic>($request);
   }
+
+  @override
+  Future<Response<dynamic>> deleteCart(int id) {
+    final Uri $url = Uri.parse('/carts/${id}');
+    final Request $request = Request(
+      'DELETE',
+      $url,
+      client.baseUrl,
+    );
+    return client.send<dynamic, dynamic>($request);
+  }
 }
