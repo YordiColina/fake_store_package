@@ -52,6 +52,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
   String _userInfo = '';
   String _cartInfo = '';
   String _loginInfo = '';
+  String _cartDeletedInfo= '';
 
   /// Objeto de solicitud de carrito que contiene el ID de usuario, la fecha y los productos.
   /// y un objeto de productos de carrito que contiene el ID del producto y la cantidad.
@@ -190,8 +191,11 @@ class _ExampleScreenState extends State<ExampleScreen> {
               const Text("Información del carrito creado/actualizado"),
               Text(_cartInfo), // Muestra la información del carrito creado o actualizado.
               const SizedBox(height: 20),
+              const Text("Información del carrito eliminado"),
+              Text(_cartDeletedInfo), // Muestra la información del carrito eliminado.
+              const SizedBox(height: 20),
               const Text("Información de inicio de sesión"),
-              Text(_loginInfo), // Muestra la información del inicio de sesión.
+              Text(_loginInfo),// Muestra la información del inicio de sesión.
             ],
           ),
         ),
@@ -283,7 +287,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
    * - Si hay un error, se registra el error usando `LoggerService`.
    * - Si la solicitud es exitosa, se actualiza el estado con la información del carrito.
    *
-   * Entrada: Ninguna.
+   * Entrada: el id del carrito a obtener como parámetro.
    * Salida: Ninguna, pero actualiza el estado con la información del carrito.
    */
 
@@ -397,7 +401,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
    * - Si hay un error, se registra el error usando `LoggerService`.
    * - Si la solicitud es exitosa, se actualiza el estado con la información del usuario creado.
    *
-   * Entrada: Ninguna.
+   * Entrada: un objeto de tipo User con la infomación del usuario como parámetro.
    * Salida: Ninguna, pero actualiza el estado con la información del usuario creado.
    */
   Future<void> crearUsuario( User user) async {
@@ -433,7 +437,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
    * - Si hay un error, se registra el error usando `LoggerService`.
    * - Si la solicitud es exitosa, se actualiza el estado con la información del carrito creado.
    *
-   * Entrada: Ninguna.
+   * Entrada: un objeto de tipo CartRequest como parámetro.
    * Salida: Ninguna, pero actualiza el estado con la información del carrito creado.
    */
   Future<void> crearCarrito(CartRequest cartRequest) async {
@@ -467,7 +471,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
    * - Si hay un error, se registra el error usando `LoggerService`.
    * - Si la solicitud es exitosa, se actualiza el estado con la información del carrito actualizado.
    *
-   * Entrada: Ninguna.
+   * Entrada: un objeto de tipo CartRequest y el id del carrito a actualizar como parámetro .
    * Salida: Ninguna, pero actualiza el estado con la información del carrito actualizado.
    */
   Future<void> actualizarCarrito(CartRequest cartRequest,int id) async {
@@ -483,6 +487,41 @@ class _ExampleScreenState extends State<ExampleScreen> {
         // Actualiza el estado con la información del carrito actualizado.
         setState(() {
           _cartInfo = 'Carrito actualizado: ID ${cartInfo['id']}, Fecha: ${cartInfo['date']}';
+        });
+      },
+    );
+  }
+
+  /**
+   * Función para eliminar un carrito de compras.
+   *
+   * Esta función utiliza el método `deleteCart` de `FakeStorePackage` para actualizar
+   * un carrito existente. El método devuelve un `Either<String, Map<String, dynamic>>`, donde:
+   * - `String` representa un mensaje de error.
+   * - `Map<String, dynamic>` es la respuesta del servidor con la información del carrito eliminado.
+   * la función recibe un id de tipo int  del carrito a eliminar.
+   * originalmente no borra el carrito de la api solo lo marca como eliminado y te devuelve la info del carro eliminado.
+   *
+   * El método `fold` se utiliza para manejar ambos casos:
+   * - Si hay un error, se registra el error usando `LoggerService`.
+   * - Si la solicitud es exitosa, se actualiza el estado con la información del carrito eliminado.
+   *
+   * Entrada: el id del producto a eliminar como parámetro.
+   * Salida: Ninguna, pero actualiza el estado con la información del carrito eliminado.
+   */
+  Future<void> eliminarCarrito(int id) async {
+    final cartResult = await fakeStore.deleteCart(id); // eliminamos el carrito con ID 1.
+    cartResult.fold(
+          (error) {
+        // Registra el error en los logs.
+        loggerService.logError('Error al eliminar el carrito: $error');
+      },
+          (cartInfo) {
+        // Registra la información del carrito en los logs.
+        loggerService.logInfo('Carrito eliminado: ${cartInfo.toString()}');
+        // Actualiza el estado con la información del carrito eliminado.
+        setState(() {
+          _cartDeletedInfo = 'Carrito eliminado: ID ${cartInfo['id']}, Fecha: ${cartInfo['date']}';
         });
       },
     );
@@ -534,7 +573,7 @@ class _ExampleScreenState extends State<ExampleScreen> {
    * - Si hay un error, se registra el error usando `LoggerService`.
    * - Si la solicitud es exitosa, se actualiza el estado con la información del inicio de sesión.
    *
-   * Entrada: Ninguna.
+   * Entrada: un objeto de tipo LoginRequest con la información del usuario(user, password) como parámetro.
    * Salida: Ninguna, pero actualiza el estado con la información del inicio de sesión.
    */
   Future<void> iniciarSesion(LoginRequest loginRequest) async {
