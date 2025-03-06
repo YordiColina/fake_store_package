@@ -1,21 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:json_annotation/json_annotation.dart';
 
-part 'cart.g.dart';
-
-@JsonSerializable()
 @immutable
 class Cart {
-  @JsonKey(name: "id")
   final int id;
-
-  @JsonKey(name: "userId")
   final int userId;
-
-  @JsonKey(name: "date", fromJson: _fromJsonDate, toJson: _toJsonDate)
   final DateTime date;
-
-  @JsonKey(name: "products")
   final List<CartProducts> products;
 
   const Cart({
@@ -25,21 +14,30 @@ class Cart {
     required this.products,
   });
 
-  factory Cart.fromJson(Map<String, dynamic> json) => _$CartFromJson(json);
+  factory Cart.fromJson(Map<String, dynamic> json) {
+    return Cart(
+      id: json['id'] as int,
+      userId: json['userId'] as int,
+      date: DateTime.parse(json['date'] as String),
+      products: (json['products'] as List<dynamic>)
+          .map((item) => CartProducts.fromJson(item as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$CartToJson(this);
-
-  // Métodos para convertir la fecha
-  static DateTime _fromJsonDate(dynamic date) => DateTime.parse(date as String);
-  static String _toJsonDate(DateTime date) => date.toIso8601String();
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'userId': userId,
+      'date': date.toIso8601String(),
+      'products': products.map((p) => p.toJson()).toList(),
+    };
+  }
 }
-@JsonSerializable()
+
 @immutable
 class CartProducts {
-  @JsonKey(name: "productId")
   final int productId;
-
-  @JsonKey(name: "quantity")
   final int quantity;
 
   const CartProducts({
@@ -47,7 +45,17 @@ class CartProducts {
     required this.quantity,
   });
 
-  factory CartProducts.fromJson(Map<String, dynamic> json) => _$CartProductsFromJson(json);
+  factory CartProducts.fromJson(Map<String, dynamic> json) {
+    return CartProducts(
+      productId: json['productId'] as int,
+      quantity: json['quantity'] as int,
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$CartProductsToJson(this);
+  Map<String, dynamic> toJson() {
+    return {
+      'productId': productId,
+      'quantity': quantity,
+    };
+  }
 }

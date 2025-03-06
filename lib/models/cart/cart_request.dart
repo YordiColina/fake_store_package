@@ -1,21 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:json_annotation/json_annotation.dart';
-
 import 'cart.dart';
 
-part 'cart_request.g.dart';
-
-@JsonSerializable()
 @immutable
 class CartRequest {
-
-  @JsonKey(name: "userId")
   final int userId;
-
-  @JsonKey(name: "date")
   final DateTime date;
-
-  @JsonKey(name: "products")
   final List<CartProducts> products;
 
   const CartRequest({
@@ -24,7 +13,21 @@ class CartRequest {
     required this.products,
   });
 
-  factory CartRequest.fromJson(Map<String, dynamic> json) => _$CartRequestFromJson(json);
+  factory CartRequest.fromJson(Map<String, dynamic> json) {
+    return CartRequest(
+      userId: json['userId'] as int,
+      date: DateTime.parse(json['date'] as String),
+      products: (json['products'] as List<dynamic>)
+          .map((item) => CartProducts.fromJson(item as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$CartRequestToJson(this);
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'date': date.toIso8601String(),
+      'products': products.map((p) => p.toJson()).toList(),
+    };
+  }
 }

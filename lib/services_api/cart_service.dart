@@ -1,44 +1,34 @@
-import 'package:chopper/chopper.dart';
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../models/cart/cart_request.dart';
 
-part 'cart_service.chopper.dart';
+class CartService {
+  final String baseUrl = 'https://fakestoreapi.com/carts';
+  final http.Client client;
 
-@ChopperApi()
-abstract class CartService extends ChopperService {
-  @Get(path: '/carts/user/{id}')
-  Future<Response> getCart(@Path('id') int id);
+  CartService({required this.client});
 
+  Future<http.Response> getCart(int id) async {
+    return await client.get(Uri.parse('$baseUrl/user/$id'));
+  }
 
-
-  @Post(path: '/carts')
-  Future<Response> createCart(
-  @Body() CartRequest body,
-  );
-
-  @Put(path: '/carts/{id}')
-  Future<Response> updateCart(@Path('id') int id,
-      @Body() CartRequest body,
-      );
-
-  @Delete(path: '/carts/{id}')
-  Future<Response> deleteCart(@Path('id') int id);
-
-
-
-  static CartService create() {
-    final client = ChopperClient(
-      baseUrl: Uri.parse('https://fakestoreapi.com'),
-      services: [
-        _$CartService(),
-      ],
-      interceptors: [
-        HttpLoggingInterceptor(),
-      ],
-      converter: JsonConverter(),
+  Future<http.Response> createCart(CartRequest body) async {
+    return await client.post(
+      Uri.parse(baseUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body.toJson()),
     );
-    return _$CartService(client);
+  }
+
+  Future<http.Response> updateCart(int id, CartRequest body) async {
+    return await client.put(
+      Uri.parse('$baseUrl/$id'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body.toJson()),
+    );
+  }
+
+  Future<http.Response> deleteCart(int id) async {
+    return await client.delete(Uri.parse('$baseUrl/$id'));
   }
 }
-
-

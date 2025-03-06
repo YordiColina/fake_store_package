@@ -1,27 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:json_annotation/json_annotation.dart';
 
-part 'product.g.dart';
-
-@JsonSerializable()
 @immutable
 class Product {
-  @JsonKey(name: "id")
   final int id;
-
-  @JsonKey(name: "title")
   final String title;
-
-  @JsonKey(name: "price")
   final double price;
-
-  @JsonKey(name: "category")
   final String category;
-
-  @JsonKey(name: "description")
   final String description;
-
-  @JsonKey(name: "image")
   final String image;
 
   const Product({
@@ -33,7 +18,25 @@ class Product {
     required this.image,
   });
 
-  factory Product.fromJson(Map<String, dynamic> json) => _$ProductFromJson(json);
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id: json['id'] as int? ?? 0,
+      title: json['title'] as String? ?? "Sin título",
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      category: json['category'] as String? ?? "Desconocido",
+      description: json['description'] as String? ?? "Sin descripción",
+      image: json['image'] as String? ?? "",
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$ProductToJson(this);
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'price': price,
+      'category': category,
+      'description': description,
+      'image': image,
+    };
+  }
 }

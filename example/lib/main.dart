@@ -4,7 +4,11 @@ import 'package:fake_store_package/models/cart/cart.dart';
 import 'package:fake_store_package/models/cart/cart_request.dart';
 import 'package:fake_store_package/models/user/user.dart';
 import 'package:fake_store_package/models/auth/login_request.dart';
+import 'package:fake_store_package/services_api/cart_service.dart';
+import 'package:fake_store_package/services_api/product_service.dart';
+import 'package:fake_store_package/services_api/user_service.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -35,7 +39,12 @@ class ExampleScreen extends StatefulWidget {
 
 class _ExampleScreenState extends State<ExampleScreen> {
   // Instancia de FakeStorePackage para interactuar con la API de la tienda.
-  final fakeStore = FakeStorePackage();
+  final fakeStore = FakeStorePackage(
+    loggerService: LoggerService(),
+    productService: ProductService(client: http.Client()),
+    cartService: CartService(client: http.Client()),
+    userService: UserService(client: http.Client()),
+  );
 
   String? _selectedOption; // Opción seleccionada en el dropdown de categorías.
   final LoggerService loggerService = LoggerService(); // Servicio para registrar logs.

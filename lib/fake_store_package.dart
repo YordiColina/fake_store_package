@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:fake_store_package/models/auth/login_request.dart';
@@ -25,10 +26,20 @@ import 'models/user/user.dart';
 /// - `UserService`: Para interactuar con los endpoints relacionados con usuarios.
 /// - `LoggerService`: Para registrar información y errores durante las operaciones.
 class FakeStorePackage {
-  final LoggerService _loggerService = LoggerService();
-  final ProductService _productService = ProductService.create();
-  final CartService _cartService = CartService.create();
-  final UserService _userService = UserService.create();
+  final LoggerService loggerService;
+  final ProductService? _productService;
+  final CartService? _cartService;
+  final UserService? _userService;
+
+  FakeStorePackage({
+    required this.loggerService,
+    ProductService? productService,
+    CartService? cartService,
+    UserService? userService,
+  })  : _productService = productService,
+        _cartService = cartService,
+        _userService = userService;
+
 
   /// Obtiene todos los productos disponibles en la API.
   ///
@@ -45,21 +56,20 @@ class FakeStorePackage {
   ///   o un mensaje de error si falla.
   Future<Either<String, List<Product>>> getAllProducts() async {
     return await ApiErrorHandler.execute(() async {
-      final response = await _productService.getAllProducts();
-      if (response.isSuccessful) {
-        if (response.body is List<dynamic>) {
-          final List<Product> products =
-          (response.body as List).map((e) => Product.fromJson(e)).toList();
-          for (var product in products) {
-            _loggerService.logProductDetails(product, response.statusCode);
-          }
-          return products;
-        } else {
-          throw FormatException('Unexpected response format: ${response.body}');
+      final response = await _productService?.getAllProducts();
+
+      if (response != null && response.statusCode >= 200 && response.statusCode < 300) {
+        final List<dynamic> jsonData = jsonDecode(response.body);
+        final List<Product> products = jsonData.map((e) => Product.fromJson(e)).toList();
+
+        for (var product in products) {
+          loggerService.logProductDetails(product, response.statusCode);
         }
+
+        return products;
       } else {
         throw HttpException(
-            'API Error: ${response.statusCode} - ${response.error ?? "Unknown error"}');
+            ' ${response?.statusCode} - ${response?.reasonPhrase ?? "Unknown error"}');
       }
     });
   }
@@ -79,12 +89,13 @@ class FakeStorePackage {
   ///   o un mensaje de error si falla.
   Future<Either<String, Product>> getProduct(int id) async {
     return await ApiErrorHandler.execute(() async {
-      final response = await _productService.getProduct(id);
-      if (response.isSuccessful) {
-        return Product.fromJson(response.body);
+      final response = await _productService?.getProduct(id);
+      if (response != null && response.statusCode >= 200 && response.statusCode < 300) {
+        final Map<String, dynamic> jsonData = jsonDecode(response.body);
+        return Product.fromJson(jsonData);
       } else {
         throw HttpException(
-            'API Error: ${response.statusCode} - ${response.error ?? "Unknown error"}');
+            'API Error: ${response?.statusCode} - ${response?.reasonPhrase ?? "Unknown error"}');
       }
     });
   }
@@ -104,19 +115,31 @@ class FakeStorePackage {
   ///   o un mensaje de error si falla.
   Future<Either<String, Categories>> getCategories() async {
     return await ApiErrorHandler.execute(() async {
-      final response = await _productService.getCategories();
-      if (response.isSuccessful) {
-        final data = response.body as List<dynamic>;
-        final Categories categories = Categories.fromJson(data);
-        _loggerService.logInfo(
-            'Categorías obtenidas correctamente\n ${response.statusCode}\n ${categories.categories}');
-        return categories;
+      final response = await _productService?.getCategories();
+
+      if (response != null && response.statusCode >= 200 && response.statusCode < 300) {
+        final jsonData = jsonDecode(response.body);
+
+        // Verificar si jsonData es realmente una lista de strings
+        if (jsonData is List && jsonData.every((element) => element is String)) {
+          final Categories categories = Categories.fromJson(jsonData);
+
+          loggerService.logInfo(
+              'Categorías obtenidas correctamente\n ${response.statusCode}\n ${categories.categories}'
+          );
+
+          return categories;
+        } else {
+          throw FormatException('Formato incorrecto: se esperaba una lista de strings');
+        }
       } else {
         throw HttpException(
-            'API Error: ${response.statusCode} - ${response.error ?? "Unknown error"}');
+            'API Error: ${response?.statusCode} - ${response?.reasonPhrase ?? "Unknown error"}'
+        );
       }
     });
   }
+
 
   /// Obtiene todos los productos de una categoría específica.
   ///
@@ -133,20 +156,16 @@ class FakeStorePackage {
   ///   o un mensaje de error si falla.
   Future<Either<String, List<Product>>> getProductsByCategory(String category) async {
     return await ApiErrorHandler.execute(() async {
-      final response = await _productService.getProductByCategory(category);
+      final response = await _productService?.getProductByCategory(category);
 
-      print('Respuesta de la API: ${response.body}'); // Debugging
+      loggerService.logInfo('Respuesta de la API: ${response?.body}'); // Debugging
 
-      if (response.isSuccessful) {
-        if (response.body is List) {
-          return (response.body as List).map((e) => Product.fromJson(e)).toList();
-        } else {
-          throw HttpException('La API no devolvió una lista de productos.');
-        }
+      if (response != null && response.statusCode >= 200 && response.statusCode < 300) {
+        final List<dynamic> jsonData = jsonDecode(response.body);
+        return jsonData.map((e) => Product.fromJson(e)).toList();
       } else {
         throw HttpException(
-            'API Error: ${response.statusCode} - ${response.error ?? "Unknown error"}'
-        );
+            'API Error: ${response?.statusCode} - ${response?.reasonPhrase ?? "Unknown error"}');
       }
     });
   }
@@ -168,27 +187,24 @@ class FakeStorePackage {
   ///   o un mensaje de error si falla.
   Future<Either<String, List<Cart>>> getCart(int id) async {
     return await ApiErrorHandler.execute(() async {
-      final response = await _cartService.getCart(id);
+      final response = await _cartService?.getCart(id);
 
-      if (response.isSuccessful) {
-        final data = response.body;
-        if (data is List) {
-          final List<Cart> carts = data
-              .map((cartData) => Cart.fromJson(cartData as Map<String, dynamic>))
-              .toList();
-          for (var cart in carts) {
-            _loggerService.logInfo(
-              'Carrito obtenido correctamente\n ${response.statusCode}\ncarrito nro ${cart.id}\n'
-                  'productos en carrito: ${cart.products.length}',
-            );
-          }
-          return carts;
-        } else {
-          throw Exception('Respuesta inesperada: Se esperaba una lista, pero se recibió otro tipo de dato.');
+      if ( response != null && response.statusCode >= 200 && response.statusCode < 300) {
+        final List<dynamic> jsonData = jsonDecode(response.body);
+        final List<Cart> carts = jsonData
+            .map((cartData) => Cart.fromJson(cartData as Map<String, dynamic>))
+            .toList();
+
+        for (var cart in carts) {
+          loggerService.logInfo(
+            'Carrito obtenido correctamente\n ${response.statusCode}\nCarrito nro ${cart.id}\n'
+                'Productos en carrito: ${cart.products.length}',
+          );
         }
+        return carts;
       } else {
         throw HttpException(
-            'API Error: ${response.statusCode} - ${response.error ?? "Unknown error"}');
+            'API Error: ${response?.statusCode} - ${response?.reasonPhrase ?? "Unknown error"}');
       }
     });
   }
@@ -208,12 +224,14 @@ class FakeStorePackage {
   ///   o un mensaje de error si falla.
   Future<Either<String, GetUser>> getUser(int id) async {
     return await ApiErrorHandler.execute(() async {
-      final response = await _userService.getUser(id);
-      if (response.isSuccessful) {
-        return GetUser.fromJson(response.body);
+      final response = await _userService?.getUser(id);
+
+      if (response != null && response.statusCode >= 200 && response.statusCode < 300) {
+        final Map<String, dynamic> jsonData = jsonDecode(response.body);
+        return GetUser.fromJson(jsonData);
       } else {
         throw HttpException(
-            'API Error: ${response.statusCode} - ${response.error ?? "Unknown error"}');
+            'API Error: ${response?.statusCode} - ${response?.reasonPhrase ?? "Unknown error"}');
       }
     });
   }
@@ -232,12 +250,13 @@ class FakeStorePackage {
   ///   o un mensaje de error si falla.
   Future<Either<String, Map<String, dynamic>>> createUser(User body) async {
     return await ApiErrorHandler.execute(() async {
-      final response = await _userService.createUser(body);
-      if (response.isSuccessful) {
-        return response.body as Map<String, dynamic>;
+      final response = await _userService?.createUser(body);
+
+      if (response != null && response.statusCode >= 200 && response.statusCode < 300) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
       } else {
         throw HttpException(
-            'API Error: ${response.statusCode} - ${response.error ?? "Unknown error"}');
+            'API Error: ${response?.statusCode} - ${response?.reasonPhrase ?? "Unknown error"}');
       }
     });
   }
@@ -256,12 +275,13 @@ class FakeStorePackage {
   ///   o un mensaje de error si falla.
   Future<Either<String, Map<String, dynamic>>> login(LoginRequest body) async {
     return await ApiErrorHandler.execute(() async {
-      final response = await _userService.login(body.toJson());
-      if (response.isSuccessful) {
-        return response.body as Map<String, dynamic>;
+      final response = await _userService?.login(body.toJson());
+
+      if (response != null && response.statusCode >= 200 && response.statusCode < 300) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
       } else {
         throw HttpException(
-            'API Error: ${response.statusCode} - ${response.error ?? "Unknown error"}');
+            'API Error: ${response?.statusCode} - ${response?.reasonPhrase ?? "Unknown error"}');
       }
     });
   }
@@ -280,12 +300,13 @@ class FakeStorePackage {
   ///   o un mensaje de error si falla.
   Future<Either<String, Map<String, dynamic>>> createCart(CartRequest body) async {
     return await ApiErrorHandler.execute(() async {
-      final response = await _cartService.createCart(body);
-      if (response.isSuccessful) {
-        return response.body as Map<String, dynamic>;
+      final response = await _cartService?.createCart(body);
+
+      if (response != null && response.statusCode >= 200 && response.statusCode < 300) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
       } else {
         throw HttpException(
-            'API Error: ${response.statusCode} - ${response.error ?? "Unknown error"}');
+            'API Error: ${response?.statusCode} - ${response?.reasonPhrase ?? "Unknown error"}');
       }
     });
   }
@@ -305,12 +326,13 @@ class FakeStorePackage {
   ///   o un mensaje de error si falla.
   Future<Either<String, Map<String, dynamic>>> updateCart(int id, CartRequest body) async {
     return await ApiErrorHandler.execute(() async {
-      final response = await _cartService.updateCart(id, body);
-      if (response.isSuccessful) {
-        return response.body as Map<String, dynamic>;
+      final response = await _cartService?.updateCart(id, body);
+
+      if (response != null && response.statusCode >= 200 && response.statusCode < 300) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
       } else {
         throw HttpException(
-            'API Error: ${response.statusCode} - ${response.error ?? "Unknown error"}');
+            'API Error: ${response?.statusCode} - ${response?.reasonPhrase ?? "Unknown error"}');
       }
     });
   }
@@ -330,13 +352,16 @@ class FakeStorePackage {
   ///   o un mensaje de error si falla.
   Future<Either<String, Map<String, dynamic>>> deleteCart(int id) async {
     return await ApiErrorHandler.execute(() async {
-      final response = await _cartService.deleteCart(id);
-      if (response.isSuccessful) {
-        return response.body as Map<String, dynamic>;
+      final response = await _cartService?.deleteCart(id);
+
+      if (response != null && response.statusCode >= 200 && response.statusCode < 300) {
+        // Si el cuerpo está vacío, devolvemos un mapa vacío en lugar de intentar jsonDecode.
+        return response.body.isNotEmpty ? jsonDecode(response.body) as Map<String, dynamic> : {};
       } else {
         throw HttpException(
-            'API Error: ${response.statusCode} - ${response.error ?? "Unknown error"}');
+            'API Error: ${response?.statusCode} - ${response?.reasonPhrase ?? "Unknown error"}');
       }
     });
   }
+
 }

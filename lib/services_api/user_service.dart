@@ -1,38 +1,30 @@
-import 'package:chopper/chopper.dart';
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../models/user/user.dart';
 
-part 'user_service.chopper.dart';
+class UserService {
+  final String baseUrl = 'https://fakestoreapi.com/users';
+  final http.Client client;
 
-@ChopperApi()
-abstract class UserService extends ChopperService {
-  @Get(path: '/users/{id}')
-  Future<Response> getUser(@Path('id') int id);
+  UserService({required this.client});
 
+  Future<http.Response> getUser(int id) async {
+    return await client.get(Uri.parse('$baseUrl/$id'));
+  }
 
-  @Post(path: '/users')
-  Future<Response> createUser(
-      @Body() User body,
-      );
-
-  @Post(path: '/auth/login')
-  Future<Response> login(
-      @Body() Map<String, dynamic> body,
-      );
-
-  static UserService create() {
-    final client = ChopperClient(
-      baseUrl: Uri.parse('https://fakestoreapi.com'),
-      services: [
-        _$UserService(),
-      ],
-      interceptors: [
-        HttpLoggingInterceptor(),
-      ],
-      converter: const JsonConverter(),
+  Future<http.Response> createUser(User body) async {
+    return await client.post(
+      Uri.parse(baseUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body.toJson()),
     );
-    return _$UserService(client);
+  }
+
+  Future<http.Response> login(Map<String, dynamic> body) async {
+    return await client.post(
+      Uri.parse('https://fakestoreapi.com/auth/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(body),
+    );
   }
 }
-
-
